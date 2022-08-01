@@ -23,7 +23,7 @@ function generateHmac(p: {
 }) {
   const key = 'catheongaming@2022test'
   const secret = 'RMxpJ8baKZkkFQbxPX8vidbr3WMPzN83'
-  const signature = `p.method + '\n' + p.apiUrl + '\n' + p.nonce.toString() + '\n' + p.queryParam ? JSON.stringify(p.queryParam) : ''`;
+  const signature = `${p.method}'\n'${p.apiUrl}'\n'${p.nonce.toString()}'\n'${p.queryParam ? JSON.stringify(p.queryParam) : ''}`;
   const localSignature = crypto.createHmac("SHA256", secret).update(signature).digest("hex");
   return `Bearer ${key}:${localSignature}:${p.nonce}`;
 }
@@ -35,9 +35,16 @@ export default async function handler(
   const hmac: string = generateHmac({
     method: 'GET',
     apiUrl: 'api/fiats/buy',
-    nonce: new Date().getTime() / 1000,
+    nonce: Math.round(new Date().getTime() / 1000),
   });
-  banxaSDK.auth(hmac);
-  const currencies = await banxaSDK.getFiatCurrencies({orderType: 'buy'}).catch((err: any) => err?.message);
+  const currencies = await fetch(
+    'https://catheongaming.banxa-sandbox.com/api/fiats', 
+    {
+      method: 'GET',
+      headers: {
+        Authorization: hmac,
+      },
+    },
+  );
   res.status(200).json(currencies)
 }
