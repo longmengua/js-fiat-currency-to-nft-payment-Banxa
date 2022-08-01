@@ -10,13 +10,13 @@ export default async function banxaFiatCurrencies(
     apiUrl: 'api/fiats/buy',
     nonce: Math.round(new Date().getTime() / 1000),
   });
+  const headers = new Headers();
+  headers.append('Authorization', hmac)
   const currencies = await fetch(
     'https://catheongaming.banxa-sandbox.com/api/fiats', 
     {
       method: 'GET',
-      headers: {
-        Authorization: hmac,
-      },
+      headers,
     },
   );
   res.status(200).json(currencies)

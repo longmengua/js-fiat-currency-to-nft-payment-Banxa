@@ -10,13 +10,13 @@ export default async function banxaPaymentMethod(
     apiUrl: 'api/payment-methods',
     nonce: Math.round(new Date().getTime() / 1000),
   });
+  const headers = new Headers();
+  headers.append('Authorization', hmac)
   const currencies = await fetch(
     'https://catheongaming.banxa-sandbox.com/api/payment-methods', 
     {
       method: 'GET',
-      headers: {
-        Authorization: hmac,
-      },
+      headers,
     },
   );
   res.status(200).json(currencies)
