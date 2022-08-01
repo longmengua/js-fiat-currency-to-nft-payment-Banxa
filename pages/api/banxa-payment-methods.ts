@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { generateHmac } from '../../src/util/hmac';
 
-export default async function handler(
+export default async function banxaPaymentMethod(
   req: NextApiRequest,
   res: NextApiResponse<any>
 ) {
