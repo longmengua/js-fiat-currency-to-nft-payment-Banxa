@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 
-
 /* (https://docs.banxa.com/docs/step-3-authentication)
   Message authentication signature. The request message is hashed with the API Secret using SHA256 algorithm.
   The structure of the message:
