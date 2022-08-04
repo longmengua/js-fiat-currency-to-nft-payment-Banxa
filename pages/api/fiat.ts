@@ -9,6 +9,7 @@ function generateHmac(p: any) {
   }else {
       var signature = p.method + '\n' + p.apiUrl + '\n' + p.nonce.toString();
   }
+  console.log(signature);
   var localSignature = crypto.createHmac("SHA256", secret).update(signature).digest("hex");
   return "Bearer ".concat(key, ":").concat(localSignature, ":").concat(p.nonce);
 }
@@ -23,12 +24,16 @@ const hmac: string = generateHmac({
 });
 const headers = new Headers();
 headers.append('Authorization', hmac)
-const currencies = await fetch(
+headers.append('Content-type', 'application/json')
+headers.append('Accept', 'application/json')
+const currencies: Response = await fetch(
   'https://catheongaming.banxa-sandbox.com/api/fiats/buy', 
   {
     method: 'GET',
     headers,
   },
-);
+).then(res => {
+  return res.json();
+});
 res.status(200).json(currencies)
 }
