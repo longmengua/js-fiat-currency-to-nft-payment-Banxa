@@ -12,12 +12,12 @@ export class BANXA_PAYMENT {
 
   // build Hmac
   static buildHmac = (p: BanxaParamI) => {
-    let signature = '';
+    let signature = p.method + '\n' + p.apiUrl + '\n' + p.nonce.toString();
     if(p.queryParam){
-      signature = p.method + '\n' + p.apiUrl + '\n' + p.nonce.toString() + p.queryParam ? '\n' + JSON.stringify(p.queryParam) : '';
-    } else {
-      signature = p.method + '\n' + p.apiUrl + '\n' + p.nonce.toString();
-    }
+      signature += p.queryParam ? `\n${JSON.stringify(p.queryParam)}` : '';
+      console.log('======= signature')
+      console.log(signature)
+    } 
     const localSignature = crypto.createHmac("SHA256", this.secret).update(signature).digest("hex");
     return `Bearer ${this.key}:${localSignature}:${p.nonce}`;
   }
@@ -47,7 +47,12 @@ export class BANXA_PAYMENT {
         method: p.method,
         headers,
       },
-    ).then(res => res.json());
+    ).then(res => {
+      return res.json();
+    }).catch(e => {
+      console.log(e);
+      throw e;
+    });
     return outcome;
   }
 

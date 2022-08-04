@@ -7,6 +7,9 @@ export const Select = (p: {
   initValue?: string;
   options?: Array<string>;
   isDarkStyle?: boolean;
+  onSelect?: (value: string, index: number) => void | Promise<void>
+  onChange?: (value: string) => void | Promise<void>
+  openSelect?: (isOpen: boolean) => void | Promise<void>
 }) => {
   const hasOption = Array.isArray(p.options) && p.options?.length > 0;
   const [state, setState] = useState<{
@@ -19,14 +22,17 @@ export const Select = (p: {
 
   const openSelect = () => {
     setState(pre => ({...pre, isOpen: !pre.isOpen}))
+    p.openSelect && p.openSelect(!state.isOpen)
   }
 
   const onChange = (e: any) => {
     setState(pre => ({...pre, value: e.target.value}))
+    p.onChange && p.onChange(e.target.value)
   } 
 
   const onSelect = (index: number) => {
     setState(pre => ({...pre, value: p.options![index], isOpen: false})) 
+    p.onSelect && p.onSelect(p.options![index], index)
   }
 
   const renderOptions = useMemo(() => !hasOption ? <div className="no option"/> : p.options?.map((value, index) => <div key={uuid()} className={`${p.isDarkStyle ? 'hover:bg-gray-300' : ''} py-[4px] px-[7px] cursor-pointer`} onClick={() => onSelect(index)}>{value}</div>), [p.options])

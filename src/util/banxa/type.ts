@@ -102,7 +102,7 @@ export type BanxaPaymentNFTOrderI = {
   // This must be the exact domain where the iFrame will be hosted. 
   // e.g. [yourCompany].com. 
   // Do not include https:// in front of the domain.
-  iframe_domain: string
+  iframe_domain?: string
   // Please return us the purchase_reference and 
   // NFT meta data which includes the contract address and token ID. 
   // The other fields are optional.

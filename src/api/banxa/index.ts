@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useState } from "react"
+import { BanxaCurrencyListResponseI, BanxaPaymentMethodListResponseI } from "../../util/banxa/type";
 
 export const useCurrencyList = () => {
-  const [list, setList] = useState<[] | undefined>(undefined);
+  const [list, setList] = useState<BanxaCurrencyListResponseI['data']['fiats'] | undefined>(undefined);
   
   const getList = useCallback(async () => {
-    const json: any = await fetch('api/banxa-fiat-currency-list').then(res => res.json());
-    console.log('CurrencyList', list);
-    setList(json);
+    const res: Response = await fetch('api/banxa-fiat-currency-list');
+    if(res.ok) {
+      const json: BanxaCurrencyListResponseI = await res.json();
+      console.log('useCurrencyList', json);
+      setList(json.data.fiats);
+    }
   }, [list]);
 
   useEffect(() => {
@@ -17,12 +21,15 @@ export const useCurrencyList = () => {
 }
 
 export const usePaymentMethodList = () => {
-  const [list, setList] = useState<[] | undefined>(undefined);
+  const [list, setList] = useState<BanxaPaymentMethodListResponseI['data']['payment_methods'] | undefined>(undefined);
   
   const getList = useCallback(async () => {
-    const json: any = await fetch('api/banxa-payment-method-list').then(res => res.json());
-    console.log('PaymentList', list);
-    setList(json);
+    const res: Response = await fetch('api/banxa-payment-method-list');
+    if(res.ok) {
+      const json: BanxaPaymentMethodListResponseI = await res.json();
+      console.log('usePaymentMethodList', json);
+      setList(json.data.payment_methods);
+    }
   }, [list]);
 
   useEffect(() => {
