@@ -1,9 +1,53 @@
 
-export type BanxaPaymentParamI = {
+export type BanxaParamI = {
   method: string, 
   apiUrl: string, 
-  nonce?: number, 
-  queryParam?: any,
+  nonce: number, 
+  queryParam: any,
+}
+export type BanxaGetRequestI = Omit<BanxaParamI, 'nonce' | 'queryParam'>
+export type BanxaPostRequestI = Omit<BanxaParamI, 'nonce'>
+export type BanxaCurrencyListResponseI = {
+  data: {
+    fiats: Array<{
+      fiat_code: string;
+      fiat_name: string;
+      fiat_symbol: string;
+    }>;
+  };
+}
+export type BanxaPaymentMethodListResponseI = {
+  data: {
+    payment_methods: Array<{
+      id: number;
+      paymentType: string;
+      name: string;
+      description: string;
+      logo_url: string;
+      status: string;
+      supported_agents: Array<{
+        os: string;
+        browser: string;
+      }>;
+      type: string;
+      supported_fiat: string[];
+      supported_coin: string[];
+      transaction_fees: Array<{
+        fiat_code: string;
+        coin_code: string;
+        fees: Array<{
+          name: string;
+          amount: number;
+          type: string;
+        }>;
+      }>;
+      transaction_limits: Array< {
+        fiat_code: string;
+        min: string;
+        max: string;
+      }>;
+  }>;
+  }
 }
 /*
   {

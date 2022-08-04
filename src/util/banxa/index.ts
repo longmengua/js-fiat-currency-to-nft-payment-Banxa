@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { BanxaPaymentNFTOrderI, BanxaPaymentParamI, BanxaWebHooksI } from './type';
+import { BanxaGetRequestI, BanxaPaymentNFTOrderI, BanxaParamI, BanxaPostRequestI, BanxaWebHooksI, BanxaCurrencyListResponseI, BanxaPaymentMethodListResponseI } from './type';
 
 // https://docs.banxa.com/docs/step-3-authentication
 export class BANXA_PAYMENT {
@@ -11,7 +11,7 @@ export class BANXA_PAYMENT {
   static buildNonce = () => Math.round(new Date().getTime() / 1000)
 
   // build Hmac
-  static buildHmac = (p: BanxaPaymentParamI) => {
+  static buildHmac = (p: BanxaParamI) => {
     let signature = '';
     if(p.queryParam){
       signature = p.method + '\n' + p.apiUrl + '\n' + p.nonce.toString() + p.queryParam ? '\n' + JSON.stringify(p.queryParam) : '';
@@ -23,7 +23,7 @@ export class BANXA_PAYMENT {
   }
 
   // build header
-  static buildHeader = async (p: BanxaPaymentParamI) => {
+  static buildHeader = async (p: BanxaParamI) => {
     const hmac = this.buildHmac(p)
     const headers = new Headers();
     headers.append('Content-type', 'application/json')
@@ -33,15 +33,15 @@ export class BANXA_PAYMENT {
   }
 
   // build fetch request
-  static buildFetch = async (param: BanxaPaymentParamI) => {
-    const p: BanxaPaymentParamI = {
+  static buildFetch = async <T>(param: BanxaGetRequestI | BanxaPostRequestI): Promise<T> => {
+    const p: BanxaParamI = {
       method: param?.method,
       apiUrl: param?.apiUrl,
       nonce: this.buildNonce(), 
-      queryParam: param?.queryParam,
+      queryParam: 'queryParam' in param ? param?.queryParam : undefined,
     }
     const headers = await this.buildHeader(p);
-    const outcome: Response = await fetch(
+    const outcome = await fetch(
       `${this.domain}/${p.apiUrl}`, 
       {
         method: p.method,
@@ -52,8 +52,8 @@ export class BANXA_PAYMENT {
   }
 
   // get supported currency list.
-  static fetchFiatCurrencyList = async () => {
-    const p: BanxaPaymentParamI = {
+  static fetchFiatCurrencyList = async (): Promise<BanxaCurrencyListResponseI> => {
+    const p: BanxaGetRequestI = {
       method: 'GET',
       apiUrl: 'api/fiats/buy',
     };
@@ -61,8 +61,8 @@ export class BANXA_PAYMENT {
   }
 
   // get supported payment method list.
-  static fetchPaymentMethodList = async () => {
-    const p: BanxaPaymentParamI = {
+  static fetchPaymentMethodList = async (): Promise<BanxaPaymentMethodListResponseI> => {
+    const p: BanxaGetRequestI = {
       method: 'GET',
       apiUrl: 'api/payment-methods',
     }
@@ -71,7 +71,7 @@ export class BANXA_PAYMENT {
   
   // create NFT order
   static buyNFT = async (queryParam: BanxaPaymentNFTOrderI) => {
-    const p: BanxaPaymentParamI = {
+    const p: BanxaPostRequestI = {
       method: 'POST',
       apiUrl: '/api/orders/nft/buy',
       queryParam: queryParam,
