@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { BANXA_PAYMENT } from '../../src/util/banxa'
-import { BanxaPaymentNFTOrderI } from '../../src/util/banxa/type';
+import { BanxaNFTOrderI } from '../../src/util/banxa/type';
 import { uuid } from '../../src/util/uuid';
 
 export default async function banxaBuyNft(
@@ -15,11 +15,11 @@ export default async function banxaBuyNft(
     res.status(401).send({ message: 'Bad request' })
     return
   }
-  const json: BanxaPaymentNFTOrderI = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  const json: BanxaNFTOrderI = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
   // Unique customer reference provided by you to identify the order in our system
   const account_reference: string = uuid();
   console.log('account_reference', account_reference);
-  const data: BanxaPaymentNFTOrderI = {
+  const data: BanxaNFTOrderI = {
     account_reference: account_reference,
     source: 'USD',
     source_amount: '100',
@@ -34,6 +34,6 @@ export default async function banxaBuyNft(
       }
     }
   }
-  const outcome = await BANXA_PAYMENT.buyNFT(data);
+  const outcome = await BANXA_PAYMENT.createNFT(data);
   res.status(200).json(outcome)
 }

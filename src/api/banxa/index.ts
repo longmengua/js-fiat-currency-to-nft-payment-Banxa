@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { BanxaCurrencyListResponseI, BanxaPaymentMethodListResponseI } from "../../util/banxa/type";
+import { BanxaCurrencyListResponseI, BanxaMethodListResponseI } from "../../util/banxa/type";
 
 export const useCurrencyList = () => {
   const [list, setList] = useState<BanxaCurrencyListResponseI['data']['fiats'] | undefined>(undefined);
@@ -21,12 +21,12 @@ export const useCurrencyList = () => {
 }
 
 export const usePaymentMethodList = () => {
-  const [list, setList] = useState<BanxaPaymentMethodListResponseI['data']['payment_methods'] | undefined>(undefined);
+  const [list, setList] = useState<BanxaMethodListResponseI['data']['payment_methods'] | undefined>(undefined);
   
   const getList = useCallback(async () => {
     const res: Response = await fetch('api/banxa-payment-method-list');
     if(res.ok) {
-      const json: BanxaPaymentMethodListResponseI = await res.json();
+      const json: BanxaMethodListResponseI = await res.json();
       console.log('usePaymentMethodList', json);
       setList(json.data.payment_methods);
     }

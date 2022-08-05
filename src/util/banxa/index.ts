@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { BanxaGetRequestI, BanxaPaymentNFTOrderI, BanxaParamI, BanxaPostRequestI, BanxaWebHooksI, BanxaCurrencyListResponseI, BanxaPaymentMethodListResponseI } from './type';
+import { BanxaGetRequestI, BanxaNFTOrderI, BanxaParamI, BanxaPostRequestI, BanxaWebHooksI, BanxaCurrencyListResponseI, BanxaMethodListResponseI, BanxaOrderI } from './type';
 
 // https://docs.banxa.com/docs/step-3-authentication
 export class BANXA_PAYMENT {
@@ -56,34 +56,6 @@ export class BANXA_PAYMENT {
     return outcome;
   }
 
-  // get supported currency list.
-  static fetchFiatCurrencyList = async (): Promise<BanxaCurrencyListResponseI> => {
-    const p: BanxaGetRequestI = {
-      method: 'GET',
-      apiUrl: 'api/fiats/buy',
-    };
-    return await this.buildFetch(p);
-  }
-
-  // get supported payment method list.
-  static fetchPaymentMethodList = async (): Promise<BanxaPaymentMethodListResponseI> => {
-    const p: BanxaGetRequestI = {
-      method: 'GET',
-      apiUrl: 'api/payment-methods',
-    }
-    return await this.buildFetch(p);
-  }
-  
-  // create NFT order
-  static buyNFT = async (queryParam: BanxaPaymentNFTOrderI) => {
-    const p: BanxaPostRequestI = {
-      method: 'POST',
-      apiUrl: '/api/orders/nft/buy',
-      queryParam: queryParam,
-    }
-    return await this.buildFetch(p);
-  }
-
   // webhooks - POST, for banxa to notify us the status of the NFT order
   static updateNFTByBanxa = async (p: BanxaWebHooksI): Promise<{
     status: string,
@@ -113,5 +85,139 @@ export class BANXA_PAYMENT {
       "status":"Pending", // please refer to BanxaWebHooksI orderStatus type
     }
     return res;
+  }
+
+  // create token order
+  // Allows your customer to create a buy or sell crypto order with Banxa. 
+  // Upon success, the response will contain a checkout URL which will be unique for the order. 
+  // The customer will be redirected to this URL to complete the checkout process, 
+  // which will expire after 1 minute if a redirect does not occur.
+  static createTokenOrder = async (queryParam: BanxaOrderI, orderType?: 'buy' | 'sell') => {
+    const defaultOrderType = orderType || 'buy';
+    const p: BanxaPostRequestI = {
+      method: 'POST',
+      apiUrl: `/api/orders/${defaultOrderType}`,
+      queryParam: queryParam,
+    }
+    return await this.buildFetch(p);
+  }
+
+  // create NFT order
+  static createNFT = async (queryParam: BanxaNFTOrderI<any>, orderType?: 'buy' | 'sell') => {
+    const defaultOrderType = orderType || 'buy';
+    const p: BanxaPostRequestI = {
+      method: 'POST',
+      apiUrl: `/api/orders/nft/${defaultOrderType}`,
+      queryParam: queryParam,
+    }
+    return await this.buildFetch(p);
+  }
+
+  // get supported currency list.
+  static fetchFiatCurrencyList = async (): Promise<BanxaCurrencyListResponseI> => {
+    const p: BanxaGetRequestI = {
+      method: 'GET',
+      apiUrl: 'api/fiats/buy',
+    };
+    return await this.buildFetch(p);
+  }
+
+  // get supported payment method list.
+  static fetchPaymentMethodList = async (): Promise<BanxaMethodListResponseI> => {
+    const p: BanxaGetRequestI = {
+      method: 'GET',
+      apiUrl: 'api/payment-methods',
+    }
+    return await this.buildFetch(p);
+  }
+
+  // Retrieve all available cryptocurrencies of buy or sell
+  static fetchCurrncyList = async (orderType: 'buy' | 'sell') => {
+    const p: BanxaGetRequestI = {
+      method: 'GET',
+      apiUrl: `api/coins/${orderType}`,
+    }
+    return await this.buildFetch(p);
+  }
+
+  // Retrieve all available countries
+  static fetchCountryList = async () => {
+    const p: BanxaGetRequestI = {
+      method: 'GET',
+      apiUrl: `api/countries`,
+    }
+    return await this.buildFetch(p);
+  }
+
+  // Retrieve all available US States
+  static fetchUSStatesList = async () => {
+    const p: BanxaGetRequestI = {
+      method: 'GET',
+      apiUrl: `api/countries/us/states`,
+    }
+    return await this.buildFetch(p);
+  }
+
+  // Get prices for all available payment methods or 
+  // for a single payment method. 
+  // Note that this endpoint should only be called 
+  // when a user requests prices by providing the cryptocurrency, 
+  // fiat and ideally amounts and payment method. 
+  // This endpoint is for dynamic quotations 
+  // and not to retrieve a list 
+  // of static prices that can be cached. 
+  // As a result, the endpoint is rate limited.
+  static fetchPrice = async () => {
+    const p: BanxaGetRequestI = {
+      method: 'GET',
+      apiUrl: `api/prices`,
+    }
+    return await this.buildFetch(p);
+  }
+
+  // Retrieves details for single order that has been submitted.
+  static fetchOrderByOrderId = async (orderId: string) => {
+    const p: BanxaGetRequestI = {
+      method: 'GET',
+      apiUrl: `api/orders/{orderId}`,
+    }
+    return await this.buildFetch(p);
+  }
+
+  // Retrieves details for a bulk of orders 
+  // that have been submitted within a given time range 
+  // and optionally by order status or customer.
+  static fetchOrders = async (param: {
+    // The date must be in the format YYYY-MM-DD.
+    startDate: string, 
+    // The date must be in the format YYYY-MM-DD.
+    endDate: string, 
+    // Current status of an order. 
+    // https://docs.banxa.com/docs/order-status
+    // query in multiple statuses would be like this => inProgress,coinTransferred,declined.
+    status?: 'pendingPayment' 
+    | 'waitingPayment' 
+    | 'paymentReceived'
+    | 'inProgress'
+    | 'coinTransferred' 
+    | 'cancelled'
+    | 'declined' 
+    | 'complete' 
+    | 'expired' 
+    | 'refunded',
+    per_page?: number,
+    // Page to retrieve. 
+    // The number of pages available is given
+    // in the meta object in the response.
+    page?: number,
+    // Customer reference that was passed as a parameter when creating an order.
+    // Used to retrieve all orders for a customer.
+    account_reference?: string,
+  }) => {
+    const p: BanxaGetRequestI = {
+      method: 'GET',
+      apiUrl: `api/orders`,
+    }
+    return await this.buildFetch(p);
   }
 }
