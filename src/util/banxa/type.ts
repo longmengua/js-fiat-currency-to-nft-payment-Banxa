@@ -243,3 +243,26 @@ export type BanxaGetOrdersParamI = {
   // Used to retrieve all orders for a customer.
   account_reference?: string;
 };
+
+export type BanxaPriceParamI = {
+  // Source fiat or cryptocurrency code e.g. 'USD' for buy and 'BTC' for sell
+  source: string;
+  // Target fiat or cryptocurrency code e.g. 'BTC' for buy and 'USD' for sell
+  target: string;
+  // Amount of the source fiat or cryptocurrency
+  // that will be used to calculate the target amount.
+  // Both source_amount and target_amount should not be sent.
+  source_amount?: number;
+  // Amount of the target fiat or cryptocurrency
+  // that will be used to calculate the source_amount.
+  // Both source_amount and target_amount should not be sent.
+  target_amount?: number;
+  // Unique ID for the payment method that you want to get prices for.
+  payment_method_id?: number;
+  // Unique customer reference provided by you.
+  account_reference?: string;
+  // The blockchain that prices will be retrieved for.
+  // If this is not passed, then the default blockchain
+  // for the cryptocurrency will be used.
+  blockchain?: string;
+};

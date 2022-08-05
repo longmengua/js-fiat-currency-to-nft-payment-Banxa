@@ -11,6 +11,7 @@ import {
   BanxaTokenOrderI,
   BanxaGetOrdersParamI,
   BanxaNFTOrderStatusI,
+  BanxaPriceParamI,
 } from './type';
 
 // https://docs.banxa.com/docs/step-3-authentication
@@ -171,10 +172,10 @@ export class BANXA_PAYMENT {
   // and not to retrieve a list
   // of static prices that can be cached.
   // As a result, the endpoint is rate limited.
-  static fetchPrice = async () => {
+  static fetchPrice = async (param: BanxaPriceParamI) => {
     const p: BanxaGetRequestI = {
       method: 'GET',
-      apiUrl: `api/prices`,
+      apiUrl: `api/prices${Utility.queryStrConvert(param)}`,
     };
     return await this.buildFetch(p);
   };
